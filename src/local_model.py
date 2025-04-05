@@ -6,8 +6,6 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 from huggingface_hub import login
 from dotenv import load_dotenv
 
-from src.prompt_builder import Prompter
-
 env_file = ".env.dev"
 load_dotenv(env_file)
 login(os.getenv("HUGGING_FACE_KEY"))
@@ -45,24 +43,12 @@ class HuggingFaceModels:
             raise ValueError("Issue loading tokenizer. Contact the admin.")
         return tokenizer
 
-    def _build_prompt(
-        self,
-        query_text: str,
-        prompt_template: dict,
-    ):
-        prompter = Prompter(prompt_template=prompt_template)
-        return prompter.build_chat_prompt(query_text=query_text)
-
     def generate(
         self,
-        query_text: str,
-        prompt_template: dict[str, any],
+        input_prompt_dict: list[dict],
     ) -> dict:
         model = self._load_model()
         tokenizer = self._load_tokenizer()
-        input_prompt_dict = self._build_prompt(
-            query_text=query_text, prompt_template=prompt_template
-        )
         input_text = tokenizer.apply_chat_template(
             input_prompt_dict, tokenize=False, add_generation_prompt=False
         )
