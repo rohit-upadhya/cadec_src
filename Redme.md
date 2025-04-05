@@ -1,0 +1,1 @@
+## This is an Agentic Based Adverse Drug Event Extraction system
