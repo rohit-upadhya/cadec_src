@@ -17,12 +17,9 @@ class HuggingFaceModels:
     def __init__(
         self,
         model_name_or_path: str,
-        prompt_template: dict[str, any],
         device: torch.device = torch.device("cpu"),
     ):
         self.model_name_or_path = model_name_or_path
-        self.prompt_template = prompt_template
-        self.prompter = Prompter(prompt_template=prompt_template)
         self.device = device
         pass
 
@@ -51,16 +48,21 @@ class HuggingFaceModels:
     def _build_prompt(
         self,
         query_text: str,
+        prompt_template: dict,
     ):
-        return self.prompter.build_chat_prompt(query_text=query_text)
+        prompter = Prompter(prompt_template=prompt_template)
+        return prompter.build_chat_prompt(query_text=query_text)
 
     def generate(
         self,
         query_text: str,
+        prompt_template: dict[str, any],
     ) -> dict:
         model = self._load_model()
         tokenizer = self._load_tokenizer()
-        input_prompt_dict = self._build_prompt(query_text=query_text)
+        input_prompt_dict = self._build_prompt(
+            query_text=query_text, prompt_template=prompt_template
+        )
         input_text = tokenizer.apply_chat_template(
             input_prompt_dict, tokenize=False, add_generation_prompt=False
         )
