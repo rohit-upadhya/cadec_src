@@ -2,9 +2,9 @@ import json
 import torch
 
 from typing import Optional
-from src.local_model import HuggingFaceModels
-from src.load_input import InputLoader
-from src.prompt_builder import Prompter
+from inference.local_model import HuggingFaceModels
+from utils.load_input import InputLoader
+from utils.prompt_builder import Prompter
 
 
 class CleanData:
@@ -12,12 +12,13 @@ class CleanData:
         self,
         device: torch.device = torch.device("cpu"),
         prompt_template: Optional[dict] = None,
-    ):
-        self.huggingface_obj = HuggingFaceModels(
+        huggingface_obj=HuggingFaceModels(
             model_name_or_path="TheBloke/Asclepius-13B-GPTQ",
             # model_name_or_path="starmpcc/Asclepius-13B",
-            device=device,
-        )
+        ),
+    ):
+        self.huggingface_obj = huggingface_obj
+        self.huggingface_obj.device = device
         self.input_loader = InputLoader()
         self.prompt_template = prompt_template
         if self.prompt_template is None:
