@@ -19,10 +19,9 @@ class CleanData:
     ):
         self.huggingface_obj = huggingface_obj
         self.huggingface_obj.device = device
-        self.input_loader = InputLoader()
         self.prompt_template = prompt_template
         if self.prompt_template is None:
-            self.prompt_template = self.input_loader.load_file("prompt_tempaltes.yaml")
+            self.prompt_template = InputLoader().load_file("prompt_tempaltes.yaml")
         pass
 
     def _build_prompt(
@@ -41,14 +40,14 @@ class CleanData:
             query_text=text,
             prompt_template=self.prompt_template.get("normalize_drug_names", ""),
         )
-        gen_text = self.huggingface_obj.generate(
+        abbr_response = self.huggingface_obj.generate(
             input_prompt_dict=prompt,
         )
         # TODO: Have retries if the json is not proper
-        abbr_dict = json.loads(gen_text)
+        abbr_dict = json.loads(abbr_response)
         for key, value in abbr_dict.items():
             text.replace(old=key, new=value)
-        return gen_text
+        return text
 
     def _normalize_drug_names(
         self,
@@ -63,7 +62,8 @@ class CleanData:
         )
         # TODO: Have retries if the json is not proper
         normalized_dict = json.loads(normalized_drug_names_gen)
-        return normalized_dict.get("normalized_text", "")
+        normalized_text = normalized_dict.get("normalized_text", "")
+        return normalized_text
 
     def clean_data(
         self,
