@@ -29,3 +29,10 @@ class Prompter:
             raise ValueError("No query provided. Contact admin.")
 
         return final_prompt
+
+    def reprompter(
+        self,
+        current_prompt: list,
+        error_log: list,
+    ):
+        pass

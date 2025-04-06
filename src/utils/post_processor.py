@@ -76,7 +76,7 @@ class PostProcessor:
                 final_dict=final_dict,
                 data_point=data_point,
             )
-        return self.parsable, self.error_log
+        return self.parsable, self.error_log, final_dict
         pass
 
     def _log_errors(
