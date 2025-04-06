@@ -42,3 +42,19 @@ medical_entity_extraction:
       "symptoms_diseases": ["<symptoms_disease_1>","<symptoms_disease_2>",...]
     }
     ## Note : if there are no entries for any of the 3 entities, return an empty list for them.
+
+  reprompter: 
+    intial_message: |
+      You have made some mistakes in your generation. Please correct these mistakes enumerated below. make minimal changes to the new generation, and follow the previous instructions.
+      DO NOT APOLOGIZE, JUST GENERATE THE CORRECTED RESULTS IN THE JSON FORMAT THAT WAS ASKED OF YOU IN THE PREVIOUS MESSAGES.
+    json_parsing_error: |
+      Looks like you made an error with the JSON. It is not parsable, reexamine your previous generation and complete it given the text.{message}{detail}
+    drug_missing_completeness_error: |
+      Looks like not all the drugs from the string was parsed and extracted.
+      Specifically the following drug was not extracted : {message}{detail}.
+    symptom_missing_completeness_error: |
+      Looks like not all the symptoms or diseases from the string was parsed and extracted.
+      Specifically the following symptom or disease was not extracted : {message}{detail}.
+    ade_missing_completeness_error: |
+      Looks like not all the ADRs from the string was parsed and extracted.
+      Specifically the following ADR or disease was not extracted : {message}{detail}.

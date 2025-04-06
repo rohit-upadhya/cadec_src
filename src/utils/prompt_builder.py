@@ -35,4 +35,23 @@ class Prompter:
         current_prompt: list,
         error_log: list,
     ):
+        reprompt_content = ""
+        error_count = 1
+        if "reprompter" in self.prompt_template.keys():
+            reprompter = self.prompt_template.get("reprompter", "")
+            initial_message = reprompter.get("initial_message", "")
+            reprompt_content = f"{reprompt_content}{initial_message}"
+            for error in error_log:
+                error_type = error.get("error_type", "")
+                error_text = reprompter.get(error_type, "")
+                reprompt_content = f"{reprompt_content}\n{error_count}. {error_text}"
+                error_count += 1
+            current_prompt.append(
+                {
+                    "role": "user",
+                    "content": reprompt_content,
+                }
+            )
+        return current_prompt
+
         pass
