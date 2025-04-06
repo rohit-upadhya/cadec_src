@@ -1,0 +1,6 @@
+huggingface_hub==0.29.3
+python-dotenv==1.1.0
+PyYAML==6.0.2
+PyYAML==6.0.2
+torch==2.6.0
+transformers==4.50.2
