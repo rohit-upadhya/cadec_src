@@ -4,10 +4,10 @@ import json
 from typing import Optional
 from copy import deepcopy
 
-from inference.local_model import HuggingFaceModels
-from utils.load_input import InputLoader
-from utils.prompt_builder import Prompter
-from utils.post_processor import PostProcessor
+from src.inference.local_model import HuggingFaceModels
+from src.utils.load_input import InputLoader
+from src.utils.prompt_builder import Prompter
+from src.utils.post_processor import PostProcessor
 
 
 class EntityExtractor:

@@ -1,6 +1,6 @@
 import json
 
-from utils.data_types import ErrorTypes
+from src.utils.data_types import ErrorTypes
 
 
 class PostProcessor:

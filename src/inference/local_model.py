@@ -1,8 +1,7 @@
 import os
-import json
 import torch
 
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 from huggingface_hub import login
 from dotenv import load_dotenv
 
@@ -19,6 +18,8 @@ class HuggingFaceModels:
     ):
         self.model_name_or_path = model_name_or_path
         self.device = device
+        self.model = self._load_model()
+        self.tokenizer = self._load_tokenizer()
         pass
 
     def _load_model(
@@ -27,12 +28,28 @@ class HuggingFaceModels:
         try:
             model_config = {
                 "pretrained_model_name_or_path": self.model_name_or_path,
-                "device_map": "auto",
+                "device_map": self.device,
             }
+            quantization_config = self._quantization_config()
+            model_config["quantization_config"] = quantization_config
             model = AutoModelForCausalLM.from_pretrained(**model_config)
         except:
             raise ValueError("Issue loading model. Contact the admin.")
         return model
+
+    def _quantization_config(
+        self,
+    ):
+        # bnb_config = BitsAndBytesConfig(
+        #     load_in_4bit=True,
+        #     bnb_4bit_use_double_quant=True,
+        #     bnb_4bit_quant_type="nf4",
+        # )
+        bnb_config = BitsAndBytesConfig(
+            load_in_8bit=True,
+        )
+
+        return bnb_config
 
     def _load_tokenizer(
         self,
@@ -43,16 +60,31 @@ class HuggingFaceModels:
             raise ValueError("Issue loading tokenizer. Contact the admin.")
         return tokenizer
 
+    #     {'role': 'system', 'content': 'You are a very smart medical entity extractor. Your job is to extract all the : \n  - Drugs (Medication Names)\n  - Adverse Drug Events (ADEs)\n  - Symptoms/Diseases\nfrom the provided text.\nYou will extract all of them, and will not leave out any at all.\nYour output should have\n{\n  "drugs": ["<drug 1>","drug 2",...],\n  "ades": ["ade1","ade2",...],\n  "symptoms_diseases": ["<symptoms_disease_1>","<symptoms_disease_2>",...]\n}\n## Note : if there are no entries for any of the 3 entities, return an empty list for them.\n'}
+    # {'role': 'user', 'content': 'T1 Symptom 153 157 pain\nT2 ADR 0 9 heartburn\nT3 ADR 11 17 nausea\nT4 ADR 40 56 voracious hunger\nT5 ADR 59 103 sharp unbearable cramping pains in lower gut\nT6 Symptom 234 253 pain in my forearms'}
+    def _apply_chat_template(
+        self,
+        input_prompt_dict_list: list[dict],
+    ):
+        prompt_text = ""
+
+        for prompt_item in input_prompt_dict_list:
+            if "system" in prompt_item["role"]:
+                prompt_text = f"{prompt_text}{prompt_item['content']}\n"
+            elif "user" in prompt_item["role"]:
+                prompt_text = f"{prompt_text}\n{prompt_item['content']}\n"
+            elif "assistant" in prompt_item["role"]:
+                prompt_text = f"Your previous response was : {prompt_text}\n{prompt_item['content']}\n"
+        # prompt_text = f"{prompt_text}<|start_header_id|>assistant<|end_header_id|>"
+        return prompt_text
+
     def generate(
         self,
         input_prompt_dict: list[dict],
     ) -> dict:
-        model = self._load_model()
-        tokenizer = self._load_tokenizer()
-        input_text = tokenizer.apply_chat_template(
-            input_prompt_dict, tokenize=False, add_generation_prompt=False
-        )
-        inputs = tokenizer(input_text, return_tensors="pt").to(self.device)
-        outputs = model.generate(**inputs, max_new_tokens=20)
-        decoded_output = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        input_text = self._apply_chat_template(input_prompt_dict)
+        inputs = self.tokenizer(input_text, return_tensors="pt").to(self.device)
+        outputs = self.model.generate(**inputs, max_new_tokens=20)
+        decoded_output = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+        decoded_output = decoded_output.split("<|eot_id|>")[0]
         return decoded_output

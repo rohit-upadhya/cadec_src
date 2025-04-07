@@ -2,9 +2,9 @@ import json
 import torch
 
 from typing import Optional
-from inference.local_model import HuggingFaceModels
-from utils.load_input import InputLoader
-from utils.prompt_builder import Prompter
+from src.inference.local_model import HuggingFaceModels
+from src.utils.load_input import InputLoader
+from src.utils.prompt_builder import Prompter
 
 
 class CleanData:
@@ -36,9 +36,10 @@ class CleanData:
         self,
         text: str,
     ):
+        text = f"[Discharge Summary Begin]\n{text}\n[Discharge Summary End]"
         prompt = self._build_prompt(
             query_text=text,
-            prompt_template=self.prompt_template.get("normalize_drug_names", ""),
+            prompt_template=self.prompt_template.get("abbreviation_expansion", ""),
         )
         abbr_response = self.huggingface_obj.generate(
             input_prompt_dict=prompt,
@@ -69,9 +70,11 @@ class CleanData:
         self,
         data_point: list[str],
     ):
+        # data_point = self._abbreviation_expansion(text=data_point)
+        # data_point = self._normalize_drug_names(text=data_point)
         for line in data_point:
             line = self._abbreviation_expansion(text=line)
-            line = self._normalize_drug_names(text=line)
+            # line = self._normalize_drug_names(text=line)
 
-        data_point = data_point.join("\n")
+        data_point = "\n".join(data_point)
         return data_point

@@ -1,4 +1,5 @@
 import os
+import re
 
 
 class PreprocessData:
@@ -15,7 +16,7 @@ class PreprocessData:
         files = []
         for dirpath, _, filenames in os.walk(data_dir):
             for filename in filenames:
-                if "pdf" in filename:
+                if ".ann" in filename:
                     files.append(os.path.join(dirpath, filename))
         return files
 
@@ -38,10 +39,17 @@ class PreprocessData:
     ):
         lines = data_point.split("\n")
         updated_lines = []
-        for item in lines:
-            if item.startswith("#"):
+        postition_in_text_pattern = re.compile(r"^\d+(;\d+)*$")
+        for line in lines:
+            line = line.replace("\t", " ")
+            if line.startswith("#") or line == "":
                 continue
-            updated_lines.append(item)
+            words = line.split()
+            filtered_words = [
+                t for t in words if not postition_in_text_pattern.match(t)
+            ]
+            line = " ".join(filtered_words)
+            updated_lines.append(line)
         return updated_lines
 
     def preprocess_data(
@@ -50,3 +58,9 @@ class PreprocessData:
         data_files = self._load_data_files(data_dir=self.data_dir)
         data_points = self._load_datapoints(data_files=data_files)
         return data_points
+
+
+if __name__ == "__main__":
+    preprocess_data = PreprocessData(data_dir="dataset/test")
+    data_points = preprocess_data.preprocess_data()
+    print(data_points)
