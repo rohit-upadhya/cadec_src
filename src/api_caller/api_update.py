@@ -26,8 +26,8 @@ class Stadardize:
 
     def _standardize_entity(
         self,
-        entity,
-        source,
+        entity: str,
+        source: str,
     ):
         result = self._search(entity, source)
         results_list = result.get("result", {}).get("results", [])
@@ -39,8 +39,8 @@ class Stadardize:
 
     def _search(
         self,
-        entity,
-        source,
+        entity: str,
+        source: str,
     ):
         ticket = self._get_ticket()
         service_ticket = self._get_service_ticket(ticket)
@@ -49,7 +49,7 @@ class Stadardize:
             "string": entity,
             "ticket": service_ticket,
             "pageNumber": 1,
-            "sabs": source,  # restrict to the desired source
+            "sabs": source,
             "returnIdType": "code",
         }
         response = requests.get(url, params=params)
@@ -58,7 +58,7 @@ class Stadardize:
 
     def _get_service_ticket(
         self,
-        ticket,
+        ticket: str,
     ):
         params = {"service": "http://umlsks.nlm.nih.gov"}
         response = requests.post(ticket, data=params)

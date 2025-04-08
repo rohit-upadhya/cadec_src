@@ -6,3 +6,4 @@ class ErrorTypes(Enum):
     DRUG_MISSING = "drug_missing_completeness_error"
     SYMPTOM_MISSING = "symptom_missing_completeness_error"
     ADE_MISSING = "ade_missing_completeness_error"
+    SEMANTIC_MISMATCH = "semantic_misatch"

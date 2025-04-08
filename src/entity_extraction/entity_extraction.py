@@ -117,7 +117,7 @@ class EntityExtractor:
         self._logger(
             log=log,
         )
-        return log["last_parsed"]
+        return log["last_parsed"] if log["last_parsed"] else ground_truth_dict
 
     def _rereun_extract(
         self,

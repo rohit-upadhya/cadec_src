@@ -45,8 +45,8 @@ class Prompter:
                 error_type = error.get("error_type", "")
                 error_text = reprompter.get(error_type, "")
                 error_text = error_text.format(
-                    message=error_type.get("message", ""),
-                    detail=error_type.get("detail", ""),
+                    message=error.get("message", ""),
+                    detail=error.get("detail", ""),
                 )
                 reprompt_content = f"{reprompt_content}\n{error_count}. {error_text}"
                 error_count += 1

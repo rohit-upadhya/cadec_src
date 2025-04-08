@@ -1,5 +1,8 @@
 import json
 
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+
 from src.utils.data_types import ErrorTypes
 
 
@@ -54,9 +57,27 @@ class PostProcessor:
     def _semantic_validator(
         self,
         final_dict: dict,
-        data_point: str,
+        data_point: str | list,
     ):
+        all_words = []
+        for k, v in final_dict.keys():
+            all_words.append(v)
+        all_words = " ".join(all_words)
+        original = ""
+        if isinstance(data_point, list):
+            original = " ".join(data_point)
+        else:
+            original = data_point
+        sentence_rransformer_model = SentenceTransformer("all-MiniLM-L6-v2")
+        embeddings = sentence_rransformer_model.encode([original, all_words])
+        similarity = cosine_similarity([embeddings[0]], [embeddings[1]])[0][0]
 
+        if similarity < 0.5:
+            self._log_errors(
+                error_type=ErrorTypes.SEMANTIC_MISMATCH,
+                message=f"{original}",
+                detail=f"{all_words}",
+            )
         pass
 
     def post_processor(

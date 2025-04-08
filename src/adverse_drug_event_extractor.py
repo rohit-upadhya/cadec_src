@@ -3,9 +3,9 @@ import gc
 
 from src.preprocess.preprocess_data import PreprocessData
 from src.preprocess.clean_data import CleanData
-from src.entity_extraction import EntityExtractor
+from src.entity_extraction.entity_extraction import EntityExtractor
 from src.inference.local_model import HuggingFaceModels
-from src.api_update import Stadardize
+from src.api_caller.api_update import Stadardize
 
 
 class ADEExtractor:
@@ -71,7 +71,7 @@ class ADEExtractor:
             extracted_datapoint = entity_extractor.extract_entities(
                 data_point=data_point
             )
-            updated_data_point = {k: v for k, v in data_point}
+            updated_data_point = {k: v for k, v in data_point.items()}
             updated_data_point["extracted_datapoint"] = extracted_datapoint
             extracted_data_points.append(updated_data_point)
         self._delete_object(obj=huggingface_obj)
@@ -85,7 +85,7 @@ class ADEExtractor:
         for data_point in extracted_data_points:
             standardize = Stadardize(data_point["extracted_datapoint"])
             standardized_output = standardize.standardize_entities()
-            updated_data_point = {k: v for k, v in data_point}
+            updated_data_point = {k: v for k, v in data_point.items()}
             updated_data_point["standardized_output"] = standardized_output
             standardized_output_data_points.append(updated_data_point)
         return standardized_output_data_points

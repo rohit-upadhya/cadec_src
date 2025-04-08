@@ -85,3 +85,8 @@ medical_entity_extraction:
     ade_missing_completeness_error: |
       Looks like not all the ADRs from the string was parsed and extracted.
       Specifically the following ADR or disease was not extracted : {message}{detail}.
+    semantic_misatch: |
+      There is a sematic mismatch between the original data given to you and the generation that you gave us.
+      Original : {message}
+      Your generation : {detail}.
+      Please pick properly.
