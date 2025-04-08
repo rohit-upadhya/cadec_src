@@ -60,7 +60,7 @@ class PostProcessor:
         data_point: str | list,
     ):
         all_words = []
-        for k, v in final_dict.keys():
+        for k, v in final_dict.items():
             all_words.append(v)
         all_words = " ".join(all_words)
         original = ""
