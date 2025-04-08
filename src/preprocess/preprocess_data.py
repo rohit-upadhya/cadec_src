@@ -48,7 +48,7 @@ class PreprocessData:
             filtered_words = [
                 t for t in words if not postition_in_text_pattern.match(t)
             ]
-            line = " ".join(filtered_words)
+            line = " ".join(filtered_words[1:])
             updated_lines.append(line)
         return updated_lines
 

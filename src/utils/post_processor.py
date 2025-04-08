@@ -6,9 +6,9 @@ from src.utils.data_types import ErrorTypes
 class PostProcessor:
     def __init__(
         self,
+        error_log: list = [],
     ):
-        self.error_log = []
-        pass
+        self.error_log = error_log
 
     def _syntactic_validator(
         self,
@@ -21,6 +21,7 @@ class PostProcessor:
         except Exception as e:
             self._log_errors(
                 error_type=ErrorTypes.JSON_PARSING_ERROR,
+                message=f"{e}",
             )
             parsable = False
         return final_dict, parsable
@@ -76,18 +77,19 @@ class PostProcessor:
                 final_dict=final_dict,
                 data_point=data_point,
             )
+        print("Post processor completed with the following errors : ", self.error_log)
         return self.parsable, self.error_log, final_dict
         pass
 
     def _log_errors(
         self,
-        error_type: str,
+        error_type: ErrorTypes,
         message: str = "",
         detail: str = "",
     ):
         self.error_log.append(
             {
-                "error_type": error_type,
+                "error_type": error_type.value,
                 "message": message,
                 "detail": detail,
             }

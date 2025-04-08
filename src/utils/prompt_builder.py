@@ -44,6 +44,10 @@ class Prompter:
             for error in error_log:
                 error_type = error.get("error_type", "")
                 error_text = reprompter.get(error_type, "")
+                error_text = error_text.format(
+                    message=error_type.get("message", ""),
+                    detail=error_type.get("detail", ""),
+                )
                 reprompt_content = f"{reprompt_content}\n{error_count}. {error_text}"
                 error_count += 1
             current_prompt.append(

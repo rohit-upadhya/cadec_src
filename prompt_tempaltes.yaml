@@ -8,28 +8,47 @@ abbreviation_expansion:
 
     [Instruction Begin]
       You are are very smart medical abbreviation expansion specialist. You are adept at expanding abbreviations and returning the required expanded form.
-      ## Note : if there are no abbreviations to expand, return the same string as is, and not the whole prompt.
-      ## Note : Do not expand ADR under any circumstance.
+      The sentence might start with either
+        - ADR
+        - Disease or Symptom
+        - Drug
+      Make informed decision to extract accordingly.
+      When generating, make sure which effects are because of ADR and which are Symptoms/Diseases.
+      The ADRs are mentioned against 'ADR ' and the Diseases/Symptoms are mentioned against "Disease " or "Symptoms ". Differentiate between them, it is important for my task. Do not say that you are not sure, just put them into one of the two.
+      ## Note : Do not give any explanation of what you did or how you arrived at the result. Simply perform abbreviation expansion and that is it. Do not explain you reasoning at all.
+      ## Note : Do not explain that you are not to explain.
+      ## Note : Do not expand ADR itself, and do not mention that you are not allowed to expand it. If a sentence contains ADR, just mention it in you expansion as 'ADR' and not its expanded form.
+      ## VERY IMPORTANT : Note : For diseases, just add the disease in the generation. Do not leave out the diseases.
     [Instruction End] 
     
-    Discharge summary will given below.
+    Discharge summary will be given below : 
     
     
 
 normalize_drug_names:
   system_prompt: |
+
+    You are an intelligent clinical languge model.
+    Below is a snippet of patient's discharge summary and a following instruction from healthcare professional.
+    Write a response that appropriately completes the instruction.
+    The response should provide the accurate answer to the instruction, while being concise.
+
+    [Instruction Begin]
     You are are very smart drug name normalizer. You are adept at normalizing drug names.
-    You will follow the following steps:
-      - Extract Drug Mentions : Use NER to locate and classify drug names in the text
-      - Normalize Names: Map the extracted and expanded drug names to standardized terminologies like RxNorm.
-    Your output should have
-    {
-      "normalized_text": <normalized text>
-    }
-    for example: 
-      example here.
+    You will will extract all the drugs in the text given and normalize them. Nothing more, nothing less.
+    You are given 2 texts : 
+      - Datapoint - This is the datapoint, where you need to apply the drug normalization to all the relevant drugs present.
+      - Abbreviation Expanded - This is the abbreviation expanded string of the same datapoint, that you can use to help guide your drug normalization process.
+    Your output should look like this : 
+      Drug: <drug name>, Normalized Name: <normalized drug name>
+    Except for this, do not add anything to your output at all. I repeat nothing other than the output I demand from you. 
+    ## Note : Do not give any explanation of what you did or how you arrived at the result. Simply normalize the drug names, if there are no drugs return the text as is, do not explain at all.
+    ## Note : Do not explain anything, just normalize the drug name.
+    ## Note : If there is no normalizing required, just return a text saying "No Normalization required." 
+    ## VERY IMPORTANT : Just normalize the drug names, no explanation requried, no need to say that you understand the instruction. NORMALIZE THE DRUGS IF PRRESENT, NOTHING MORE NOTHING LESS.
+    [Instruction End]
     
-    ## Note : if there are no normalization to be done, return the same string.
+    Discharge summary will be given below : 
 
 medical_entity_extraction:
   system_prompt: |
@@ -39,20 +58,24 @@ medical_entity_extraction:
       - Symptoms/Diseases
     from the provided text.
     You will extract all of them, and will not leave out any at all.
-    Your output should have
+    Your output should only have:
+
     {
       "drugs": ["<drug 1>","drug 2",...],
       "ades": ["ade1","ade2",...],
       "symptoms_diseases": ["<symptoms_disease_1>","<symptoms_disease_2>",...]
     }
+
     ## Note : if there are no entries for any of the 3 entities, return an empty list for them.
+    ## VERY IMPORTANT : I dont need to know how you got the extraction, just give me the JSON in the format I asked you. Nothing more, Nothing less. Do not add any fluff, just the JSON, it is very important for my pipeline.
 
   reprompter: 
     intial_message: |
       You have made some mistakes in your generation. Please correct these mistakes enumerated below. make minimal changes to the new generation, and follow the previous instructions.
       DO NOT APOLOGIZE, JUST GENERATE THE CORRECTED RESULTS IN THE JSON FORMAT THAT WAS ASKED OF YOU IN THE PREVIOUS MESSAGES.
     json_parsing_error: |
-      Looks like you made an error with the JSON. It is not parsable, reexamine your previous generation and complete it given the text.{message}{detail}
+      Looks like you made an error with the JSON. It is not parsable, reexamine your previous generation and complete it given the text. Error : {message}{detail}
+      You are to only return the JSON, no fillter words like "Final results" on top, or anything explaining what you did. I just need the JSON.
     drug_missing_completeness_error: |
       Looks like not all the drugs from the string was parsed and extracted.
       Specifically the following drug was not extracted : {message}{detail}.

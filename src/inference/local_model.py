@@ -1,4 +1,3 @@
-import os
 import torch
 
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
@@ -7,7 +6,7 @@ from dotenv import load_dotenv
 
 env_file = ".env.dev"
 load_dotenv(env_file)
-login(os.getenv("HUGGING_FACE_KEY"))
+# login(os.getenv("HUGGING_FACE_KEY"))
 
 
 class HuggingFaceModels:
@@ -31,7 +30,8 @@ class HuggingFaceModels:
                 "device_map": self.device,
             }
             quantization_config = self._quantization_config()
-            model_config["quantization_config"] = quantization_config
+            if "meta-llama" not in self.model_name_or_path:
+                model_config["quantization_config"] = quantization_config
             model = AutoModelForCausalLM.from_pretrained(**model_config)
         except:
             raise ValueError("Issue loading model. Contact the admin.")
@@ -78,13 +78,39 @@ class HuggingFaceModels:
         # prompt_text = f"{prompt_text}<|start_header_id|>assistant<|end_header_id|>"
         return prompt_text
 
+    def _apply_chat_template_llama(
+        self,
+        input_prompt_dict_list: list[dict],
+    ):
+        prompt_text = ""
+
+        for prompt_item in input_prompt_dict_list:
+            if "system" in prompt_item["role"]:
+                prompt_text = f"{prompt_text}<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n{prompt_item['content']}<|eot|>\n"
+            elif "user" in prompt_item["role"]:
+                prompt_text = f"{prompt_text}<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n{prompt_item['content']}<|eot|>\n"
+            elif "assistant" in prompt_item["role"]:
+                prompt_text = f"{prompt_text}<|start_header_id|>assistant<|end_header_id|>\n{prompt_item['content']}<|eot|>\n"
+        prompt_text = f"{prompt_text}<|start_header_id|>assistant<|end_header_id|>"
+        return prompt_text.strip()
+        pass
+
     def generate(
         self,
         input_prompt_dict: list[dict],
     ) -> dict:
-        input_text = self._apply_chat_template(input_prompt_dict)
+        chat_template_to_apply = (
+            self._apply_chat_template
+            if "meta-llama" in self.model_name_or_path
+            else self._apply_chat_template
+        )
+        input_text = chat_template_to_apply(input_prompt_dict)
         inputs = self.tokenizer(input_text, return_tensors="pt").to(self.device)
-        outputs = self.model.generate(**inputs, max_new_tokens=20)
+        outputs = self.model.generate(**inputs, max_new_tokens=300)
         decoded_output = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-        decoded_output = decoded_output.split("<|eot_id|>")[0]
+        decoded_output = decoded_output.split(input_text)
+        decoded_output = (
+            decoded_output[0] if len(decoded_output) == 1 else decoded_output[1]
+        )
+        decoded_output = decoded_output.split("<|eot|>")[0]
         return decoded_output
