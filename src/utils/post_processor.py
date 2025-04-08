@@ -68,8 +68,8 @@ class PostProcessor:
             original = " ".join(data_point)
         else:
             original = data_point
-        sentence_rransformer_model = SentenceTransformer("all-MiniLM-L6-v2")
-        embeddings = sentence_rransformer_model.encode([original, all_words])
+        sentence_transformer_model = SentenceTransformer("all-MiniLM-L6-v2")
+        embeddings = sentence_transformer_model.encode([original, all_words])
         similarity = cosine_similarity([embeddings[0]], [embeddings[1]])[0][0]
 
         if similarity < 0.5:
@@ -78,6 +78,7 @@ class PostProcessor:
                 message=f"{original}",
                 detail=f"{all_words}",
             )
+        del sentence_transformer_model
         pass
 
     def post_processor(
