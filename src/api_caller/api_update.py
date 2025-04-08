@@ -15,7 +15,7 @@ class Stadardize:
     ):
         standardized_entities = {}
 
-        for key, entities in self.input_entities:
+        for key, entities in self.input_entities.items():
 
             standardized_entities[key] = [
                 self._standardize_entity(
