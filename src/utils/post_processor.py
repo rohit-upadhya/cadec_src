@@ -61,7 +61,7 @@ class PostProcessor:
     ):
         all_words = []
         for k, v in final_dict.items():
-            all_words.append(v)
+            all_words.extend(v)
         all_words = " ".join(all_words)
         original = ""
         if isinstance(data_point, list):
