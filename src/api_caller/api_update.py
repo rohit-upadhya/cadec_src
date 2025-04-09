@@ -23,6 +23,7 @@ class Stadardize:
                 )
                 for entity in entities
             ]
+        return standardized_entities
 
     def _standardize_entity(
         self,
@@ -44,7 +45,7 @@ class Stadardize:
     ):
         ticket = self._get_ticket()
         service_ticket = self._get_service_ticket(ticket)
-        url = "https://uts-ws.nlm.nih.gov/restsearch/current"
+        url = "https://uts-ws.nlm.nih.gov/rest/search/current"
         params = {
             "string": entity,
             "ticket": service_ticket,
@@ -77,14 +78,22 @@ class Stadardize:
 
 if __name__ == "__main__":
     input_entities = {
-        "drugs": ["Arthrotec"],
+        "drugs": [
+            "Arthrotec",
+            "Diclofenac Sodium",
+            "Misoprostol",
+        ],
         "ades": [
             "bit drowsy",
             "little blurred vision",
             "gastric problems",
             "feel a bit weird",
         ],
-        "symptoms_diseases": ["arthritis", "agony", "pains"],
+        "symptoms_diseases": [
+            "arthritis",
+            "agony",
+            "pains",
+        ],
     }
     standardize = Stadardize(input_entities)
     standardized_output = standardize.standardize_entities()
